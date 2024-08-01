@@ -1,0 +1,23 @@
+{
+    "name": "backend---pasarela",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+      "dev": "nodemon src/index.js",
+      "start": "node src/index.js"
+    },
+    "type": "module",
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+      "axios": "^1.7.2",
+      "cors": "^2.8.5",
+      "express": "^4.19.2",
+      "http": "^0.0.1-security",
+      "nodemon": "^3.1.4",
+      "playfab-sdk": "^2.157.240719"
+    }
+  }
+  
