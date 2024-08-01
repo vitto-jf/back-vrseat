@@ -1,3 +1,5 @@
+import crypto from 'crypto'
+
 export const JWT_SECRET = "test";
 
 // Clave secreta para firmar JWT

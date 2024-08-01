@@ -15,6 +15,7 @@ import { login } from "./controller/auth/login/index.js";
 import { singup } from "./controller/auth/singup/index.js";
 import { removeItemInventory } from "./controller/inventory/remove-item/index.js";
 import { addItemInventoryUser } from "./controller/inventory/add-item/index.js";
+import { CompileErrorReport } from "./utils/utils.js";
 
 const app = express();
 

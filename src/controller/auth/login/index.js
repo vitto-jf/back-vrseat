@@ -1,5 +1,5 @@
-import { PlayFabClient } from "playfab-sdk";
-import { encrypt,CompileErrorReport } from "../../../utils/utils.js";
+import { PlayFab, PlayFabClient } from "playfab-sdk";
+import { encrypt,CompileErrorReport, JWT_SECRET } from "../../../utils/utils.js";
 import jwt from "jsonwebtoken";
 import { serialize } from "cookie";
 
