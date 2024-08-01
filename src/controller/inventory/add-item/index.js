@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { CompileErrorReport } from "../../../utils/utils.js";
 
 export async function addItemInventoryUser(req, res, next) {
-    console.log('verify-add')
+    // console.log('verify-add')
 
   const body = req.body;
   const session = req.headers.authorization;

@@ -20,10 +20,12 @@ import { CompileErrorReport } from "./utils/utils.js";
 const app = express();
 
 PlayFab.settings.developerSecretKey = playfabConfig.secretKey;
+
 PlayFab.settings.titleId = playfabConfig.titleId;
+
 app.use(
   cors({
-    origin: "http://localhost:3000", // Reemplaza con la URL de tu frontend
+    origin: "http://localhost:3000", 
     credentials: true,
   })
 );

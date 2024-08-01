@@ -2,14 +2,11 @@ import crypto from 'crypto'
 
 export const JWT_SECRET = "test";
 
-// Clave secreta para firmar JWT
-// Clave secreta para cifrar la carga útil
-// Clave de cifrado estática de 32 bytes
 export const ENCRYPTION_KEY = Buffer.from(
   "uN9a1gQ3KPJbbC+k1b3E9T62j90G7o3lsoJDD9SH3hQ=",
   "base64"
-); // Clave de 32 bytes
-const IV_LENGTH = 16; // Longitud del vector de inicialización (16 bytes para AES)
+);
+const IV_LENGTH = 16; 
 
 // Función para cifrar
 export function encrypt(text) {
@@ -17,9 +14,9 @@ export function encrypt(text) {
   let cipher = crypto.createCipheriv("aes-256-cbc", ENCRYPTION_KEY, iv);
   let encrypted = cipher.update(text, "utf8", "hex");
   encrypted += cipher.final("hex");
-
   return iv.toString("hex") + ":" + encrypted;
 }
+
 export function CompileErrorReport(error) {
     if (error == null) return "";
     let fullErrors = error.errorMessage;
