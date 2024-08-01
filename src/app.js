@@ -32,7 +32,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
-  res.send({ message: "test funcionando", isSucces: true });
+  res.send({ message: "Servidor funcionando", isSucces: true });
 });
 
 app.post("/login", login);
