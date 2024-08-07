@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { CompileErrorReport } from "../utils/utils.js";
 
 export async function verifyExistItem(req, res, next) {
-    // console.log('verify-item')
+    console.log('verify-item')
   const { products } = req.body;
 
   const session = req.headers.authorization;

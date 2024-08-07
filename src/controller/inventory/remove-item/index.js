@@ -5,11 +5,11 @@ export async function removeItemInventory(req, res) {
   try {
     const call = await axios.post(
       `https://${playfabConfig.titleId}.playfabapi.com/Admin/RevokeInventoryItem`,
-      { PlayFabId: "", ItemInstanceId: "" },
+      { PlayFabId: "A4438A4A3C384AB", ItemInstanceId: "928713FFD6907" },
       {
         headers: {
-          "X-SecretKey": "",
-          "X-EntityToken": "",
+          "X-SecretKey": playfabConfig.secretKey,
+          
         },
       }
     );

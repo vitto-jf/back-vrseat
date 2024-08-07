@@ -25,7 +25,7 @@ PlayFab.settings.titleId = playfabConfig.titleId;
 
 app.use(
   cors({
-    origin: "http://localhost:3000", 
+    origin: "http://localhost:3000",
     credentials: true,
   })
 );
@@ -51,6 +51,17 @@ app.post(
   verifyDuplicatedItemUserInvetory,
   addItemInventoryUser
 );
+
+//VALID ITEM
+app.post("/verify-sell", verifyExistItem, verifyDuplicatedItemUserInvetory,async(req,res)=>{
+  try {
+    
+    return res.json({isSuccess:true, message:'Item validado, no hay errores',isValid:true})
+  } catch (error) {
+    return res.json({isSuccess:false, message:'Ocurrio un error en el servidor',error, isValid:false})
+    
+  }
+});
 
 app.get("/get-inventory", async (req, res) => {
   try {

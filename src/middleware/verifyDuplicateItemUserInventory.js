@@ -3,7 +3,7 @@ import { PlayFabServer } from "playfab-sdk";
 import { CompileErrorReport } from "../utils/utils.js";
 
 export async function verifyDuplicatedItemUserInvetory(req, res, next) {
-    // console.log('verify-duplicated')
+    console.log('verify-duplicated')
     const { products } = req.body;
 
   const session = req.headers.authorization;
