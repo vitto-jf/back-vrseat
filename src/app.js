@@ -17,6 +17,12 @@ import { removeItemInventory } from "./controller/inventory/remove-item/index.js
 import { addItemInventoryUser } from "./controller/inventory/add-item/index.js";
 import { CompileErrorReport } from "./utils/utils.js";
 
+
+// REFERAL CODES
+import { executecCodeValidation } from "./controller/referal-code/validate-code/index.js";
+import { executecGetCodeInfo } from "./controller/referal-code/get-code-info/index.js";
+
+
 const app = express();
 
 PlayFab.settings.developerSecretKey = playfabConfig.secretKey;
@@ -79,7 +85,45 @@ app.get("/get-inventory", async (req, res) => {
       message: "Error en la solicitud",
       isSuccess: false,
       error: error.response ? error.response.data : error.message,
-    });
+    })
   }
 });
+
+
+
+/***************************************************
+ ***************** REFERAL CODES *******************
+ **************************************************/
+
+app.get("/validate-code", executecCodeValidation);
+app.get("/get-code-info", executecGetCodeInfo);
+
+// app.post(
+//   "/use-referal-code",
+//   validateCode,
+//   assingCode
+// );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/***************************************************
+ *************** REFERAL CODES END *****************
+ **************************************************/
 export default app;
