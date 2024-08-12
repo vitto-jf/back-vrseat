@@ -1,10 +1,12 @@
 import  dotenv  from 'dotenv';
-import { getCodesInfo } from '../get-code-info/index.js';
+import { getCodesInfo } from '../../../repository/referal-code/index.js';
+
 dotenv.config();
 
-export async function executecCodeValidation(req, res){
+export async function executeCodeValidation(req, res){
     try {
-        if(codesValidation(getCodesInfo(req.body.code))){
+        const codes = await getCodesInfo(req.body.code);
+        if(codesValidation(codes)){
             return res.status(200).send({
                 message: true,
                 isSuccess: true,
@@ -25,13 +27,14 @@ export async function executecCodeValidation(req, res){
     }
 }
 
-function codesValidation(codesToValidate){
+export function codesValidation(codesToValidate){
     try{
-        for (code in codesToValidate) {
+        console.log(codesToValidate);
+        for (const code of codesToValidate) {
             if (!code.active) return false;
-        }
+          }
         return true;
     } catch (err) {
-        console.error(error);
+        console.error(err);
     }
 }

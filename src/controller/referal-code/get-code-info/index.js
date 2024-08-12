@@ -1,8 +1,8 @@
 import  dotenv  from 'dotenv';
-import { connectToCluster } from '../../../config/mongoDB.js'
+import { getCodesInfo } from '../../../repository/referal-code/index.js';
 dotenv.config();
 
-export async function executecGetCodeInfo(req, res){
+export async function executeGetCodeInfo(req, res){
   try {
     const codesInfo = await getCodesInfo(req.body.code);
     return res.status(200).send({
@@ -18,33 +18,4 @@ export async function executecGetCodeInfo(req, res){
         error: error.response ? error.response.data : error.message,
       });
     }
-}
-
-
-export async function getCodesInfo(codeToSearch) {
-  const uri = process.env.MONGO_URI;
-  let mongoClient;
-  let result = [];
-  let cursor;
-  
-  try {
-    mongoClient = await connectToCluster(uri);
-    const db = mongoClient.db('sample_mflix');
-    const collection = db.collection('referal_codes');
-    if(codeToSearch){
-      cursor = collection.find({code: codeToSearch});
-    } else {
-      cursor = collection.find();
-    }
-    for await (const code of cursor) {
-        result.push(code);
-      }
-    return result;
-
-  } catch (error) {
-      console.error(error);
-
-  } finally {
-      await mongoClient.close();
-  }
 }

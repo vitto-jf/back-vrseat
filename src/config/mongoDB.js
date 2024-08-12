@@ -15,3 +15,6 @@ export async function connectToCluster(uri) {
         process.exit();
     }
  }
+
+
+ export const dbName = "sample_mflix"

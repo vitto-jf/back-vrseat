@@ -4,6 +4,7 @@ import cors from "cors";
 import { PlayFabServer } from "playfab-sdk";
 
 import PlayFab from "playfab-sdk/Scripts/PlayFab/PlayFab.js";
+//import PlayFab from "playfab-sdk";
 
 import cookieParser from "cookie-parser";
 
@@ -19,9 +20,8 @@ import { CompileErrorReport } from "./utils/utils.js";
 
 
 // REFERAL CODES
-import { executecCodeValidation } from "./controller/referal-code/validate-code/index.js";
-import { executecGetCodeInfo } from "./controller/referal-code/get-code-info/index.js";
-
+import referalCodeRoute from './routes/refCode.routes.js'
+import paymentOrders from './routes/paymentOders.routes.js'
 
 const app = express();
 
@@ -101,13 +101,12 @@ app.get("/get-inventory", async (req, res) => {
 });
 
 
+app.use('/payment-orders',paymentOrders)
 
 /***************************************************
  ***************** REFERAL CODES *******************
  **************************************************/
-
-app.get("/validate-code", executecCodeValidation);
-app.get("/get-code-info", executecGetCodeInfo);
+app.use('/referal-code',referalCodeRoute)
 
 // app.post(
 //   "/use-referal-code",
