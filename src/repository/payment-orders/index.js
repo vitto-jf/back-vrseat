@@ -76,25 +76,89 @@ export async function queryCreatePaymentOrder(orderData) {
   return result;
 }
 
-export async function getOrder(orderId,userId) {
+export async function getOrder(orderId, userId) {
   let mongoClient;
   mongoClient = await connectToCluster(uri);
 
   const db = mongoClient.db(dbName);
-  const result = await db.collection('orders').findOne({orderId:orderId,userId:userId}).then(res=>{
-    if(!res){ 
-  
-      return 
-    }
-  
-    return res
-  }).catch(err=>{
+  const result = await db
+    .collection("orders")
+    .findOne({ orderId: orderId, userId: userId })
+    .then((res) => {
+      if (!res) {
+        return false;
+      }
 
-    return err
-  }).finally(()=>{
-    mongoClient.close()
-  })
-  return result
+      return res;
+    })
+    .catch((err) => {
+      return err;
+    })
+    .finally(() => {
+      mongoClient.close();
+    });
+  return result;
+}
+
+export async function updateStatusOrder(orderId, userId, status) {
+  let mongoClient;
+  mongoClient = await connectToCluster(uri);
+
+  const db = mongoClient.db(dbName);
+  const result = await db
+    .collection("orders")
+    .updateOne(
+      { orderId: orderId, userId: userId },
+      { $set: { orderStatus: status } }
+    )
+    .then((res) => {
+      console.log(res);
+      if (!res) {
+        return false;
+      }
+
+      return true;
+    })
+    .catch((err) => {
+      return err;
+    })
+    .finally(() => {
+      mongoClient.close();
+    });
+  return result;
+}
+
+export async function verifyOrder(orderId, userId) {
+  const order = await getOrder(orderId, userId);
+  if (!order) {
+    return false;
+  }
+  return true;
+}
+
+export async function updateDataOrder(orderId, userId, orderUpdate) {
+  let mongoClient;
+  mongoClient = await connectToCluster(uri);
+
+  const db = mongoClient.db(dbName);
+  const result = await db
+    .collection("orders")
+    .updateOne({ orderId: orderId, userId: userId }, { $set: orderUpdate })
+    .then((res) => {
+      console.log(res);
+      if (!res) {
+        return false;
+      }
+
+      return true;
+    })
+    .catch((err) => {
+      return err;
+    })
+    .finally(() => {
+      mongoClient.close();
+    });
+  return result;
 }
 
 async function generateAndVerifyOrderId(mongoClient) {

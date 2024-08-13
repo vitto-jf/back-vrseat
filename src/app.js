@@ -18,10 +18,12 @@ import { removeItemInventory } from "./controller/inventory/remove-item/index.js
 import { addItemInventoryUser } from "./controller/inventory/add-item/index.js";
 import { CompileErrorReport } from "./utils/utils.js";
 
+import paymentRoute from "./routes/payment.routes.js";
 
 // REFERAL CODES
-import referalCodeRoute from './routes/refCode.routes.js'
-import paymentOrders from './routes/paymentOders.routes.js'
+import referalCodeRoute from "./routes/refCode.routes.js";
+import paymentOrders from "./routes/paymentOders.routes.js";
+
 
 const app = express();
 
@@ -31,12 +33,14 @@ PlayFab.settings.titleId = playfabConfig.titleId;
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3000", "http://localhost:5173"],
     credentials: true,
   })
 );
-app.use(express.json());
+
 app.use(cookieParser());
+
+app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -59,15 +63,27 @@ app.post(
 );
 
 //VALID ITEM
-app.post("/verify-sell", verifyExistItem, verifyDuplicatedItemUserInvetory,async(req,res)=>{
-  try {
-    
-    return res.json({isSuccess:true, message:'Item validado, no hay errores',isValid:true})
-  } catch (error) {
-    return res.json({isSuccess:false, message:'Ocurrio un error en el servidor',error, isValid:false})
-    
+app.post(
+  "/verify-sell",
+  verifyExistItem,
+  verifyDuplicatedItemUserInvetory,
+  async (req, res) => {
+    try {
+      return res.json({
+        isSuccess: true,
+        message: "Item validado, no hay errores",
+        isValid: true,
+      });
+    } catch (error) {
+      return res.json({
+        isSuccess: false,
+        message: "Ocurrio un error en el servidor",
+        error,
+        isValid: false,
+      });
+    }
   }
-});
+);
 
 app.get("/get-inventory", async (req, res) => {
   try {
@@ -96,42 +112,23 @@ app.get("/get-inventory", async (req, res) => {
       message: "Error en la solicitud",
       isSuccess: false,
       error: error.response ? error.response.data : error.message,
-    })
+    });
   }
 });
 
-
-app.use('/payment-orders',paymentOrders)
+app.use("/payment-orders", paymentOrders);
+app.use("/payment", paymentRoute);
 
 /***************************************************
  ***************** REFERAL CODES *******************
  **************************************************/
-app.use('/referal-code',referalCodeRoute)
+app.use("/referal-code", referalCodeRoute);
 
 // app.post(
 //   "/use-referal-code",
 //   validateCode,
 //   assingCode
 // );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /***************************************************
  *************** REFERAL CODES END *****************

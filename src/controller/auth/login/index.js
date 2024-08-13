@@ -28,7 +28,7 @@ export async function login(req, res) {
 
         // Firmar el JWT con el payload cifrado
         const token = jwt.sign({ data: payload }, JWT_SECRET);
-
+        const tokenUser = jwt.sign(data.PlayFabId, JWT_SECRET);
         const serializedToken = serialize("session", token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
@@ -38,7 +38,9 @@ export async function login(req, res) {
         });
         res.setHeader("Set-Cookie", serializedToken);
         return res.json({
+          isSuccess:true,
           message: "¡Felicidades, Logeo exitoso!",
+          tokenUser
         });
       } else if (error !== null) {
         res.status(500).json({
