@@ -1,12 +1,13 @@
 import { Router } from "express";
-import { createPaymentIntent } from "../controller/payment/stripe/create-payment-intent/index.js";
+import {  createStripePaymentIntent } from "../controller/stripe/createPaymentIntent.js";
+
 
 
 const routes = Router();
 
-routes.post("/stripe/create-payment-intent-stripe", createPaymentIntent);
-routes.post("/stripe/process-payment-intent-stripe", createPaymentIntent);
-routes.post("/process-payment", createPaymentIntent);
+routes.post("/stripe/create-payment-intent-stripe", createStripePaymentIntent);
+
+
 
 
 export default routes;

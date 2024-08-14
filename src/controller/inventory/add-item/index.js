@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { CompileErrorReport } from "../../../utils/utils.js";
 
 export async function addItemInventoryUser(req, res, next) {
-    // console.log('verify-add')
+    console.log('verify-add')
 
   const body = req.body;
   const session = req.headers.authorization;
@@ -22,9 +22,12 @@ export async function addItemInventoryUser(req, res, next) {
         PlayFabId: token.data.PFuserId,
       },
       (error, result) => {
+        console.log(error)
+        console.log(result)
         if (result !== null) {
+          
           console.log(result);
-          return res.json({
+          return res.status(200).json({
             isSuccess:true,
             message: "¡Felicidades, Agregaste el item al usuario",
             result,
@@ -33,7 +36,7 @@ export async function addItemInventoryUser(req, res, next) {
           console.log("error en la API");
           console.log(CompileErrorReport(error));
 
-          return res.status(500).json({
+          return res.status(200).json({
             isSuccess:false,
             message: "Algo salió mal con tu primera llamada a la API.",
             debugInfo: CompileErrorReport(error),

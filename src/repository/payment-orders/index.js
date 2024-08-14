@@ -1,21 +1,29 @@
 import { connectToCluster, dbName } from "../../config/mongoDB.js";
-
+import dotenv from 'dotenv';
+dotenv.config();
 const uri = process.env.MONGO_URI;
+
+let mongoClient;
+
+// Reutilización de la conexión a la base de datos
+async function getMongoClient() {
+  if (!mongoClient) {
+    mongoClient = await connectToCluster(uri);
+  }
+  return mongoClient;
+}
 
 export async function queryCreatePaymentOrder(orderData) {
   const { products, amount, PFuserId } = orderData;
 
-  let mongoClient;
+  const client = await getMongoClient();
+  const db = client.db(dbName);
 
   let expDate = new Date();
   let currentMinutes = expDate.getMinutes();
   expDate.setMinutes(currentMinutes + 30);
 
-  mongoClient = await connectToCluster(uri);
-
-  const orderId = await generateAndVerifyOrderId(mongoClient);
-
-  const db = mongoClient.db(dbName);
+  const orderId = await generateAndVerifyOrderId(client);
 
   const dataObject = {
     products,
@@ -24,7 +32,6 @@ export async function queryCreatePaymentOrder(orderData) {
     orderId: orderId,
     billingId: "",
     createdAt: new Date(),
-
     orderStatus: "pending-for-pay",
     isPaid: false,
     taxes: [],
@@ -55,114 +62,99 @@ export async function queryCreatePaymentOrder(orderData) {
     expirationDate: expDate,
   };
 
-  const result = await db
-    .collection("orders")
-    .insertOne(dataObject)
-    .then((result) => {
-      if (!result) {
-        console.log(result);
-        return result;
-      }
-      console.log(result);
-      return { orderId };
-    })
-    .catch((error) => {
-      console.log(error);
-      return error;
-    })
-    .finally(() => {
-      mongoClient.close();
-    });
-  return result;
+  try {
+    const result = await db.collection("orders").insertOne(dataObject);
+    return { orderId };
+  } catch (error) {
+    console.error("Error al crear la orden:", error);
+    return { isSuccess: false, message: "Error al crear la orden", error };
+  }
 }
 
 export async function getOrder(orderId, userId) {
-  let mongoClient;
-  mongoClient = await connectToCluster(uri);
+  const client = await getMongoClient();
+  const db = client.db(dbName);
 
-  const db = mongoClient.db(dbName);
-  const result = await db
-    .collection("orders")
-    .findOne({ orderId: orderId, userId: userId })
-    .then((res) => {
-      if (!res) {
-        return false;
-      }
-
-      return res;
-    })
-    .catch((err) => {
-      return err;
-    })
-    .finally(() => {
-      mongoClient.close();
-    });
-  return result;
+  try {
+    const result = await db.collection("orders").findOne({ orderId: orderId, userId: userId });
+    if (!result) {
+      return false;
+    }
+    return result;
+  } catch (error) {
+    console.error("Error al obtener la orden:", error);
+    return { isSuccess: false, message: "Error al obtener la orden", error };
+  }
 }
 
 export async function updateStatusOrder(orderId, userId, status) {
-  let mongoClient;
-  mongoClient = await connectToCluster(uri);
+  const client = await getMongoClient();
+  const db = client.db(dbName);
 
-  const db = mongoClient.db(dbName);
-  const result = await db
-    .collection("orders")
-    .updateOne(
+  try {
+    const res = await db.collection("orders").updateOne(
       { orderId: orderId, userId: userId },
       { $set: { orderStatus: status } }
-    )
-    .then((res) => {
-      console.log(res);
-      if (!res) {
-        return false;
-      }
-
-      return true;
-    })
-    .catch((err) => {
-      return err;
-    })
-    .finally(() => {
-      mongoClient.close();
-    });
-  return result;
-}
-
-export async function verifyOrder(orderId, userId) {
-  const order = await getOrder(orderId, userId);
-  if (!order) {
-    return false;
+    );
+    if (res.matchedCount === 0) {
+      return { isSuccess: false, message: "No se encontró la orden para actualizar" };
+    }
+    return { isSuccess: true, message: "Orden actualizada correctamente" };
+  } catch (error) {
+    console.error("Error al actualizar el estado de la orden:", error);
+    return { isSuccess: false, message: "Error al actualizar el estado de la orden", error };
   }
-  return true;
 }
 
 export async function updateDataOrder(orderId, userId, orderUpdate) {
-  let mongoClient;
-  mongoClient = await connectToCluster(uri);
+  const client = await getMongoClient();
+  const db = client.db(dbName);
 
-  const db = mongoClient.db(dbName);
-  const result = await db
-    .collection("orders")
-    .updateOne({ orderId: orderId, userId: userId }, { $set: orderUpdate })
-    .then((res) => {
-      console.log(res);
-      if (!res) {
-        return false;
-      }
-
-      return true;
-    })
-    .catch((err) => {
-      return err;
-    })
-    .finally(() => {
-      mongoClient.close();
-    });
-  return result;
+  try {
+    const res = await db.collection("orders").updateOne(
+      { orderId: orderId, userId: userId },
+      { $set: orderUpdate }
+    );
+    if (res.matchedCount === 0) {
+      return { isSuccess: false, message: "No se encontró la orden para actualizar" };
+    }
+    return { isSuccess: true, message: "Orden actualizada correctamente" };
+  } catch (error) {
+    console.error("Error al actualizar la orden:", error);
+    return { isSuccess: false, message: "Error al actualizar la orden", error };
+  }
 }
 
-async function generateAndVerifyOrderId(mongoClient) {
-  const db = mongoClient.db("sample_mflix");
+export async function getOrderFields(orderId, userId, fields) {
+  const client = await getMongoClient();
+  const db = client.db(dbName);
+
+  // Convertir el array de campos en un objeto
+  const fieldsToReturn = fields.reduce((acc, field) => {
+    acc[field] = 1;
+    return acc;
+  }, {});
+
+  // Añadir la exclusión de _id en el objeto de proyección
+  const projection = { projection: { ...fieldsToReturn, _id: 0 } };
+
+  try {
+    const result = await db.collection("orders").findOne(
+      { orderId: orderId, userId: userId },
+      projection
+    );
+    if (!result) {
+      return false;
+    }
+    return result;
+  } catch (error) {
+    console.error("Error al obtener los campos de la orden:", error);
+    return { isSuccess: false, message: "Error al obtener los campos de la orden", error };
+  }
+}
+
+async function generateAndVerifyOrderId(client) {
+  const db = client.db("sample_mflix");
   const collection = db.collection("orders");
 
   const lastOrderId = await getLastOrderId(collection);
@@ -179,7 +171,7 @@ async function generateAndVerifyOrderId(mongoClient) {
 }
 
 async function getLastOrderId(collection) {
-  const lastOrder = await collection
+  const lastOrder = await collection 
     .find()
     .sort({ orderId: -1 })
     .limit(1)

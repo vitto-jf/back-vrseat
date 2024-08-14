@@ -6,7 +6,7 @@ import { getOrder } from "../../../../repository/payment-orders/index.js";
 const stripe = new Stripe(sk)
 
 
-export async function createPaymentIntent(req, res) {
+export async function createPaymentIntentx(req, res) {
   const { orderId, userId } = req.body;
   try {
     const orderData = await getOrder(orderId, userId);

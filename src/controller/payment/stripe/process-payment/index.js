@@ -4,7 +4,7 @@ import { verifyOrder } from "../../../../repository/payment-orders";
 
 const stripe = require("stripe")(sk);
 
-export async function processPayment(req, res) {
+export async function processPaymentx(req, res) {
   const { orderId, userId } = req.body;
   try {
     const orderData = await verifyOrder(orderId, userId);

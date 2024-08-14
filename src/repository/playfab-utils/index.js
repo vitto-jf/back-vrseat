@@ -27,25 +27,6 @@ export async function addItemToUserInventory(itemId, userId) {
             }
         );
 
-        // PlayFabServer.GetUserInventory(
-        //     { PlayFabId: userId },
-        //     (error, result) => {
-        //                 console.log(playfabConfig.secretKey);
-        //                 console.log(userId);
-        //                 console.log(PlayFabServer.settings.developerSecretKey);
-        //                 console.log(PlayFabClient.settings.developerSecretKey);
-        //                 console.log(PlayFabAdmin.settings.developerSecretKey);
-
-        //                 console.log(result);
-        //                 if (result !== null) {
-        //                     console.log(result);
-        //                     return result;
-        //                 } else if (error !== null) {
-        //                     console.log("error: " + JSON.stringify(error));
-        //                     return error;
-        //                 };
-        //             }
-        //     );
   } catch (error) {
     console.log(CompileErrorReport(error));
     return error;

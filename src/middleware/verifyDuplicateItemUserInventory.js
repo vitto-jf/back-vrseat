@@ -3,8 +3,8 @@ import { PlayFabServer } from "playfab-sdk";
 import { CompileErrorReport } from "../utils/utils.js";
 
 export async function verifyDuplicatedItemUserInvetory(req, res, next) {
-    console.log('verify-duplicated')
-    const { products } = req.body;
+  console.log("verify-duplicated");
+  const { products } = req.body;
 
   const session = req.headers.authorization;
 
@@ -16,14 +16,16 @@ export async function verifyDuplicatedItemUserInvetory(req, res, next) {
     PlayFabServer.GetUserInventory(
       { PlayFabId: token.data.PFuserId },
       (error, result) => {
+        
+        
         if (result !== null) {
           const exitsItem = products.every((p) =>
             result.data.Inventory.some((i) => i.ItemId === p)
           );
-
+          console.log(exitsItem);
           if (exitsItem) {
             return res.json({
-              isSuccess:false,
+              isSuccess: false,
               message: "El producto esta duplicado",
               debugInfo: CompileErrorReport(error),
             });
@@ -33,8 +35,8 @@ export async function verifyDuplicatedItemUserInvetory(req, res, next) {
         } else if (error !== null) {
           console.log(CompileErrorReport(error));
 
-          res.status(500).json({
-            isSuccess:false,
+          return res.status(500).json({
+            isSuccess: false,
             message: "Algo salió mal con tu primera llamada a la API.",
             debugInfo: CompileErrorReport(error),
           });
