@@ -89,6 +89,23 @@ export async function getOrder(orderId, userId) {
   }
 }
 
+export async function getUserOrders(userId) {
+  const client = await getMongoClient();
+  const db = client.db(dbName);
+
+  try {
+    const result = await db.collection("orders").find({ userId: userId }).toArray();
+
+    if (!result) {
+      return false;
+    }
+    return result;
+  } catch (error) {
+    console.error("Error al obtener la orden:", error);
+    return { isSuccess: false, message: "Error al obtener la orden", error };
+  }
+}
+
 export async function updateStatusOrder(orderId, userId, status) {
   const client = await getMongoClient();
   const db = client.db(dbName);
@@ -178,7 +195,9 @@ export async function verifyOrderByUser(orderId, userId) {
   // Añadir la exclusión de _id en el objeto de proyección
 
   try {
-    const result = await db.collection("orders").findOne({ userId: userId,isPaid:false });
+    const result = await db
+      .collection("orders")
+      .findOne({ userId: userId, isPaid: false });
     if (!result) {
       return false;
     }
