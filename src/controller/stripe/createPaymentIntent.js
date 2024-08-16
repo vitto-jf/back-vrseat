@@ -29,7 +29,7 @@ export async function createStripePaymentIntent(req, res) {
       return res.json({ isSuccess: false, message: "Tu orden ya esta pagada" });
     }
 
-    const { products, amount, _id } = orderData;
+    const { products, amount,expirationDate , _id } = orderData;
 
     const paymentIntents = await stripe.paymentIntents.list({
       limit: 100, // Ajusta el límite según tus necesidades
@@ -50,6 +50,7 @@ export async function createStripePaymentIntent(req, res) {
         amount: amount * 100,
         currency: "usd", // Ajusta la moneda según tu caso
         metadata: { orderId: _id.toString() },
+        
       });
     }
 
@@ -74,7 +75,7 @@ export async function createStripePaymentIntent(req, res) {
     return res.status(200).send({
       isSuccess: true,
       cs: paymentIntent.client_secret,
-      infoOrder: { products, amount },
+      infoOrder: { products, amount,expirationDate },
     });
   } catch (error) {
     console.error(error);

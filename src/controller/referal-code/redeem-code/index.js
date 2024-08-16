@@ -5,6 +5,7 @@ import {
 } from "../../../repository/referal-code/index.js";
 import { codesValidation } from "../validate-code/index.js";
 import { addItemToUserInventory } from "../../../repository/playfab-utils/index.js";
+import { getDataSponsor } from "../../../repository/sponsor/index.js";
 dotenv.config();
 
 export async function executeRedeemCode(req, res) {
@@ -16,7 +17,21 @@ export async function executeRedeemCode(req, res) {
     if (codesValidation(codesInfo)) {
       for (const code of codesInfo) {
         console.log("for from codes validation" + JSON.stringify(code));
-        addItemToUserInventory(code.product_id, userId);
+        const resSponsor = await getDataSponsor(code.client);
+        if (!resSponsor) {
+          console.log("El codigo no esta asociado a ningun sponsor");
+          res.status(200).send({
+            isSuccess: false,
+            message: "El codigo no esta asociado a ningun sponsor",
+          });
+        }
+
+        const objectData = {
+          sponsorId: code.client.toString(),
+          refCode: code.code,
+          sponsorName: resSponsor.company_name,
+        };
+        addItemToUserInventory(code.product_id, userId, objectData);
         deactivateCode(code.code);
       }
       return res.status(200).send({

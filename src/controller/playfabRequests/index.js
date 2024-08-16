@@ -1,43 +1,28 @@
 import { PlayFab, PlayFabClient, PlayFabServer } from "playfab-sdk";
 
 export async function processItemInventoryUser(productsId, token) {
+  console.log("token");
+  console.log(token);
   try {
-    console.log("Iniciando proceso de verificación de items...");
+    // console.log("Iniciando proceso de verificación de items...");
 
     PlayFab._internalSettings.sessionTicket = token.data.PFsessionUser;
 
-    // Verificar si el item existe en el catálogo
-    console.log("Verificando si el item existe en el catálogo...");
-    const catalogItems = await new Promise((resolve, reject) => {
-      PlayFabClient.GetCatalogItems({ CatalogVersion: "HLS1" }, (errors, result) => {
-        if (result) {
-          resolve(result.data.Catalog);
-        } else {
-          reject(errors);
-        }
-      });
-    });
-
-    const itemExists = productsId.every((p) =>
-      catalogItems.some((i) => i.ItemId === p)
-    );
-
-    if (!itemExists) {
-      console.log("Item no encontrado en el catálogo.");
-      return { message: "Item no existe", isSuccess: false };
-    }
-    console.log("Items verificados en el catálogo.");
-
     // Verificar si el item está duplicado en el inventario del usuario
-    console.log("Verificando si el item está duplicado en el inventario del usuario...");
+    console.log(
+      "Verificando si el item está duplicado en el inventario del usuario..."
+    );
     const userInventory = await new Promise((resolve, reject) => {
-      PlayFabServer.GetUserInventory({ PlayFabId: token.data.PFuserId }, (error, result) => {
-        if (result) {
-          resolve(result.data.Inventory);
-        } else {
-          reject(error);
+      PlayFabServer.GetUserInventory(
+        { PlayFabId: token.data.PFuserId },
+        (error, result) => {
+          if (result) {
+            resolve(result.data.Inventory);
+          } else {
+            reject(error);
+          }
         }
-      });
+      );
     });
 
     const isDuplicated = productsId.some((p) =>
@@ -51,37 +36,36 @@ export async function processItemInventoryUser(productsId, token) {
         isSuccess: false,
       };
     }
-    console.log("Item no duplicado en el inventario del usuario.");
 
-    // Agregar el item al inventario del usuario
-    console.log("Agregando item al inventario del usuario...");
-    const addItemResult = await new Promise((resolve, reject) => {
-      PlayFabServer.GrantItemsToUser(
-        {
-          CatalogVersion: "HLS1",
-          ItemIds: productsId,
-          PlayFabId: token.data.PFuserId,
-        },
-        (error, result) => {
-          if (result) {
-            resolve(result);
-          } else {
-            reject(error);
-          }
+    PlayFabServer.GrantItemsToUser(
+      {
+        CatalogVersion: "HLS1",
+        ItemIds: productsId,
+        PlayFabId: token.data.PFuserId,
+      },
+      (error, result) => {
+        console.log(error);
+        console.log(result.data.ItemGrantResults);
+        if (result !== null) {
+          console.log(result);
+        } else if (error !== null) {
+          console.log("error en la API");
+          console.log(CompileErrorReport(error));
+
+          return {
+            isSuccess: false,
+            message: "Algo salió mal con tu primera llamada a la API.",
+            debugInfo: CompileErrorReport(error),
+          };
         }
-      );
-    });
+      }
+    );
 
-    if (!addItemResult) {
-      console.log("Ocurrió un error al agregar el item al inventario.");
-      return {
-        message: "Ocurrió un error al agregar el item",
-        isSuccess: false,
-      };
+    if (result.isSuccess) {
+      return { message: "Item agregado", isSuccess: true };
+    } else {
+      return { message: "Ocurrio un error", isSuccess: false, result };
     }
-    console.log("Item agregado al inventario del usuario.");
-
-    return { message: "Item agregado", isSuccess: true };
   } catch (err) {
     console.error("Error en processItemInventoryUser:", err);
     return {

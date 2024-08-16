@@ -1,5 +1,5 @@
 import { connectToCluster, dbName } from "../../config/mongoDB.js";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
 const uri = process.env.MONGO_URI;
 
@@ -76,7 +76,9 @@ export async function getOrder(orderId, userId) {
   const db = client.db(dbName);
 
   try {
-    const result = await db.collection("orders").findOne({ orderId: orderId, userId: userId });
+    const result = await db
+      .collection("orders")
+      .findOne({ orderId: orderId, userId: userId });
     if (!result) {
       return false;
     }
@@ -92,17 +94,26 @@ export async function updateStatusOrder(orderId, userId, status) {
   const db = client.db(dbName);
 
   try {
-    const res = await db.collection("orders").updateOne(
-      { orderId: orderId, userId: userId },
-      { $set: { orderStatus: status } }
-    );
+    const res = await db
+      .collection("orders")
+      .updateOne(
+        { orderId: orderId, userId: userId },
+        { $set: { orderStatus: status } }
+      );
     if (res.matchedCount === 0) {
-      return { isSuccess: false, message: "No se encontró la orden para actualizar" };
+      return {
+        isSuccess: false,
+        message: "No se encontró la orden para actualizar",
+      };
     }
     return { isSuccess: true, message: "Orden actualizada correctamente" };
   } catch (error) {
     console.error("Error al actualizar el estado de la orden:", error);
-    return { isSuccess: false, message: "Error al actualizar el estado de la orden", error };
+    return {
+      isSuccess: false,
+      message: "Error al actualizar el estado de la orden",
+      error,
+    };
   }
 }
 
@@ -111,12 +122,14 @@ export async function updateDataOrder(orderId, userId, orderUpdate) {
   const db = client.db(dbName);
 
   try {
-    const res = await db.collection("orders").updateOne(
-      { orderId: orderId, userId: userId },
-      { $set: orderUpdate }
-    );
+    const res = await db
+      .collection("orders")
+      .updateOne({ orderId: orderId, userId: userId }, { $set: orderUpdate });
     if (res.matchedCount === 0) {
-      return { isSuccess: false, message: "No se encontró la orden para actualizar" };
+      return {
+        isSuccess: false,
+        message: "No se encontró la orden para actualizar",
+      };
     }
     return { isSuccess: true, message: "Orden actualizada correctamente" };
   } catch (error) {
@@ -139,17 +152,44 @@ export async function getOrderFields(orderId, userId, fields) {
   const projection = { projection: { ...fieldsToReturn, _id: 0 } };
 
   try {
-    const result = await db.collection("orders").findOne(
-      { orderId: orderId, userId: userId },
-      projection
-    );
+    const result = await db
+      .collection("orders")
+      .findOne({ orderId: orderId, userId: userId }, projection);
     if (!result) {
       return false;
     }
     return result;
   } catch (error) {
     console.error("Error al obtener los campos de la orden:", error);
-    return { isSuccess: false, message: "Error al obtener los campos de la orden", error };
+    return {
+      isSuccess: false,
+      message: "Error al obtener los campos de la orden",
+      error,
+    };
+  }
+}
+
+export async function verifyOrderByUser(orderId, userId) {
+  const client = await getMongoClient();
+  const db = client.db(dbName);
+
+  // Convertir el array de campos en un objeto
+
+  // Añadir la exclusión de _id en el objeto de proyección
+
+  try {
+    const result = await db.collection("orders").findOne({ userId: userId,isPaid:false });
+    if (!result) {
+      return false;
+    }
+    return result;
+  } catch (error) {
+    console.error("Error al obtener los campos de la orden:", error);
+    return {
+      isSuccess: false,
+      message: "Error al obtener los campos de la orden",
+      error,
+    };
   }
 }
 
@@ -171,7 +211,7 @@ async function generateAndVerifyOrderId(client) {
 }
 
 async function getLastOrderId(collection) {
-  const lastOrder = await collection 
+  const lastOrder = await collection
     .find()
     .sort({ orderId: -1 })
     .limit(1)

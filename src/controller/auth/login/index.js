@@ -1,5 +1,9 @@
 import { PlayFab, PlayFabClient } from "playfab-sdk";
-import { encrypt,CompileErrorReport, JWT_SECRET } from "../../../utils/utils.js";
+import {
+  encrypt,
+  CompileErrorReport,
+  JWT_SECRET,
+} from "../../../utils/utils.js";
 import jwt from "jsonwebtoken";
 import { serialize } from "cookie";
 
@@ -23,8 +27,15 @@ export async function login(req, res) {
           PFuserId: data.PlayFabId,
           PFsessionUser: data.SessionTicket,
           ETuser: encryptedPayloadEntity,
-          exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, // Expira en 24 horas
+          exp: Math.floor(Date.now() / 1000) + 60 * 60 * 720, // Expira en 720 horas
         };
+
+        function calculateExpirationDate(days) {
+          const currentDate = new Date();
+          const expirationDate = new Date(currentDate);
+          expirationDate.setDate(currentDate.getDate() + days);
+          return expirationDate;
+        }
 
         // Firmar el JWT con el payload cifrado
         const token = jwt.sign({ data: payload }, JWT_SECRET);
@@ -33,14 +44,16 @@ export async function login(req, res) {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-          maxAge: 60 * 60 * 24, // 24 horas en segundos
+          maxAge: 60 * 60 * 720, // 720 horas en segundos
           path: "/",
         });
+
         res.setHeader("Set-Cookie", serializedToken);
         return res.json({
-          isSuccess:true,
+          isSuccess: true,
           message: "¡Felicidades, Logeo exitoso!",
-          tokenUser
+          tokenUser,
+          exp: calculateExpirationDate(30),
         });
       } else if (error !== null) {
         res.status(500).json({

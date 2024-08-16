@@ -127,7 +127,7 @@ app.post(
 app.get("/get-inventory", async (req, res) => {
   try {
     PlayFabServer.GetUserInventory(
-      { PlayFabId: "A4438A4A3C384AB" },
+      { PlayFabId: "D528E5560821690" },
       (error, result) => {
         if (result !== null) {
           console.log(result);

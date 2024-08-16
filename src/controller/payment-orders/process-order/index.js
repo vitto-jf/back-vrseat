@@ -1,33 +1,42 @@
 import dotenv from "dotenv";
 
-import { getOrderFields, updateDataOrder } from "../../../repository/payment-orders/index.js";
+import {
+  getOrderFields,
+  updateDataOrder,
+} from "../../../repository/payment-orders/index.js";
 import { createSales } from "../../../repository/sales/index.js";
 import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../../../utils/utils.js";
+import { CompileErrorReport, JWT_SECRET } from "../../../utils/utils.js";
 import { processItemInventoryUser } from "../../playfabRequests/index.js";
+import { PlayFab, PlayFabServer } from "playfab-sdk";
 
 dotenv.config();
 
 export async function processOrder(req, res) {
   const { userToken, orderId, products } = req.body;
   const session = req.cookies["session"];
-  const productsId = products.map((p) => p.id);
 
   try {
     const token = jwt.verify(session, JWT_SECRET);
     const userId = jwt.verify(userToken, JWT_SECRET);
-
+    let productsId = await products.map((p) => p.id);
+    PlayFab._internalSettings.sessionTicket = token.data.PFsessionUser;
     if (!token || !userId) {
-      return res.status(401).json({ message: "Token inválido o no proporcionado" });
+      return res
+        .status(401)
+        .json({ message: "Token inválido o no proporcionado" });
     }
 
+    // const saveItemInventory = await processItemInventoryUser(productsId, token);
+
     // Primero creamos la venta
-    const resultCreateSale = await createSales(orderId, userId);
+    const resultCreateSale = await createSales(orderId, userId, res);
 
     if (!resultCreateSale.isSuccess) {
       return res.status(200).json({
         isSuccess: false,
-        message: resultCreateSale.message || "Ocurrió un error al crear la venta",
+        message:
+          resultCreateSale.message || "Ocurrió un error al crear la venta",
       });
     }
 
@@ -45,14 +54,66 @@ export async function processOrder(req, res) {
       });
     }
 
-    // Procesar el inventario del usuario en PlayFab
-    const saveItemInventory = await processItemInventoryUser(productsId, token);
+    try {
+      // Verificar si el item está duplicado en el inventario del usuario
+      console.log(
+        "Verificando si el item está duplicado en el inventario del usuario..."
+      );
+      const userInventory = await new Promise((resolve, reject) => {
+        PlayFabServer.GetUserInventory(
+          { PlayFabId: token.data.PFuserId },
+          (error, result) => {
+            if (result) {
+              resolve(result.data.Inventory);
+              return result.data.Inventory;
+            } else {
+              reject(error);
+              return error;
+            }
+          }
+        );
+      });
 
-    if (!saveItemInventory.isSuccess) {
-      return res.status(200).json({
+      const isDuplicated = productsId.some((p) =>
+        userInventory.some((i) => i.ItemId === p)
+      );
+
+      if (isDuplicated) {
+        console.log("Item duplicado en el inventario del usuario.");
+        return res
+          .status(200)
+          .send({ message: "Item duplicado", isSuccess: false });
+      }
+
+      PlayFabServer.GrantItemsToUser(
+        {
+          CatalogVersion: "HLS1",
+          ItemIds: productsId,
+          PlayFabId: token.data.PFuserId,
+        },
+        (error, result) => {
+          console.log(error);
+          console.log(result.data.ItemGrantResults);
+          if (result !== null) {
+            console.log(result);
+          } else if (error !== null) {
+            console.log("error en la API");
+            console.log(CompileErrorReport(error));
+
+            return {
+              isSuccess: false,
+              message: "Algo salió mal con tu primera llamada a la API.",
+              debugInfo: CompileErrorReport(error),
+            };
+          }
+        }
+      );
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({
+        message: "Error en la solicitud",
         isSuccess: false,
-        info: saveItemInventory,
-        message: "Ocurrió un error al agregar el evento a tu perfil",
+        error: error.response ? error.response.data : error.message,
       });
     }
 
