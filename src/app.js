@@ -41,6 +41,7 @@ app.use(
       "http://localhost:5001",
       "https://vr-seat.vrinsitu.com",
     ],
+    methods:["POST","GET"],
     credentials: true,
   })
 );
