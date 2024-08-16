@@ -35,7 +35,12 @@ PlayFab.settings.titleId = playfabConfig.titleId;
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:5173","http://localhost:5001"],
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "http://localhost:5001",
+      "https://vr-seat.vrinsitu.com",
+    ],
     credentials: true,
   })
 );
@@ -80,11 +85,10 @@ app.get("/test-cookie", async (req, res) => {
     }
   );
 
-  if(result.data.isSucces){
-    return res.json(result.data)
+  if (result.data.isSucces) {
+    return res.json(result.data);
   }
-  return res.json(result.data)
-
+  return res.json(result.data);
 });
 
 //AGREGAR ITEM AL USUARIO
