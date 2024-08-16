@@ -43,7 +43,7 @@ export async function login(req, res) {
         const serializedToken = serialize("session", token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
-          sameSite: 'none',
+          sameSite: 'lax',
           maxAge: 60 * 60 * 720, // 720 horas en segundos
           path: "/",
         });
