@@ -21,14 +21,9 @@ export async function login(req, res) {
         const { data } = result;
 
         // Cifrar los datos sensibles
-        const encryptedPayloadEntity = encrypt(data.EntityToken.EntityToken);
+        // const encryptedPayloadEntity = encrypt(data.EntityToken.EntityToken);
         // Datos sensibles a cifrar
-        const payload = {
-          PFuserId: data.PlayFabId,
-          PFsessionUser: data.SessionTicket,
-          ETuser: encryptedPayloadEntity,
-          exp: Math.floor(Date.now() / 1000) + 60 * 60 * 720, // Expira en 720 horas
-        };
+        const payload = data.SessionTicket;
 
         function calculateExpirationDate(days) {
           const currentDate = new Date();
@@ -38,21 +33,24 @@ export async function login(req, res) {
         }
 
         // Firmar el JWT con el payload cifrado
-        const token = jwt.sign({ data: payload }, JWT_SECRET);
+        const tokenSession = jwt.sign(payload, JWT_SECRET);
         const tokenUser = jwt.sign(data.PlayFabId, JWT_SECRET);
-        const serializedToken = serialize("session", token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production", // Asegúrate de que esté en true en producción
-          sameSite: 'none', // 'None' permite que la cookie se envíe en solicitudes cross-site
-          maxAge: 60 * 60 * 720, // 720 horas en segundos
-          path: "/",
-        });
+        // const serializedToken = serialize("session", token, {
+        //   httpOnly: true,
+        //   secure: true, // Asegúrate de que esté en true en producción
+        //   sameSite: 'lax', // 'None' permite que la cookie se envíe en solicitudes cross-site
+        //   maxAge: 60 * 60 * 720, // 720 horas en segundos
 
-        res.setHeader("Set-Cookie", serializedToken);
+        //   path: "/",
+        // });
+
+        // res.setHeader("Set-Cookie", serializedToken);
         return res.json({
           isSuccess: true,
           message: "¡Felicidades, Logeo exitoso!",
           tokenUser,
+          session: tokenSession,
+          expSession: data.EntityToken.TokenExpiration,
           exp: calculateExpirationDate(30),
         });
       } else if (error !== null) {

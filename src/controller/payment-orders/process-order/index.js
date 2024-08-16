@@ -14,14 +14,14 @@ dotenv.config();
 
 export async function processOrder(req, res) {
   const { userToken, orderId, products } = req.body;
-  const session = req.cookies["session"];
+  const PFsessionUser = req.headers.authorization;
 
   try {
-    const token = jwt.verify(session, JWT_SECRET);
+    
     const userId = jwt.verify(userToken, JWT_SECRET);
     let productsId = await products.map((p) => p.id);
-    PlayFab._internalSettings.sessionTicket = token.data.PFsessionUser;
-    if (!token || !userId) {
+    PlayFab._internalSettings.sessionTicket = PFsessionUser;
+    if (!PFsessionUser || !userId) {
       return res
         .status(401)
         .json({ message: "Token inválido o no proporcionado" });
@@ -61,7 +61,7 @@ export async function processOrder(req, res) {
       );
       const userInventory = await new Promise((resolve, reject) => {
         PlayFabServer.GetUserInventory(
-          { PlayFabId: token.data.PFuserId },
+          { PlayFabId: userId},
           (error, result) => {
             if (result) {
               resolve(result.data.Inventory);
@@ -89,7 +89,7 @@ export async function processOrder(req, res) {
         {
           CatalogVersion: "HLS1",
           ItemIds: productsId,
-          PlayFabId: token.data.PFuserId,
+          PlayFabId: userId,
         },
         (error, result) => {
           console.log(error);

@@ -106,6 +106,7 @@ app.post(
   verifyExistItem,
   verifyDuplicatedItemUserInvetory,
   async (req, res) => {
+    req.header
     try {
       return res.json({
         isSuccess: true,

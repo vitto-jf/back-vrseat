@@ -39,9 +39,9 @@ export async function executeRedeemCode(req, res) {
         message: "Codigo activo",
       });
     } else {
-      return res.status(500).send({
+      return res.status(200).send({
         message: "El codigo se encuentra inactivo",
-        isSuccess: true,
+        isSuccess: false,
       });
     }
   } catch (error) {
