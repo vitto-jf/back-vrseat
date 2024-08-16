@@ -42,7 +42,7 @@ export async function login(req, res) {
         const tokenUser = jwt.sign(data.PlayFabId, JWT_SECRET);
         const serializedToken = serialize("session", token, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
+          secure:true,
           sameSite: 'lax',
           maxAge: 60 * 60 * 720, // 720 horas en segundos
           path: "/",
