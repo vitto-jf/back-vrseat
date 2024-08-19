@@ -14,7 +14,7 @@ import { JWT_SECRET } from "../../utils/utils.js";
 const stripe = new Stripe(sk);
 
 
-console.log(sk)
+// console.log(sk)
 export async function createStripePaymentIntent(req, res) {
   const { orderId, userToken } = req.body;
   try {

@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
-
+import dotenv from "dotenv";
+dotenv.config();
 import { PlayFabServer } from "playfab-sdk";
 
 import PlayFab from "playfab-sdk/Scripts/PlayFab/PlayFab.js";
@@ -41,7 +42,7 @@ app.use(
       "http://localhost:5001",
       "https://vr-seat.vrinsitu.com",
     ],
-    methods:["POST","GET"],
+    methods: ["POST", "GET"],
     credentials: true,
   })
 );
@@ -106,7 +107,7 @@ app.post(
   verifyExistItem,
   verifyDuplicatedItemUserInvetory,
   async (req, res) => {
-    req.header
+    req.header;
     try {
       return res.json({
         isSuccess: true,
