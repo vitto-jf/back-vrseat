@@ -1,8 +1,9 @@
 //import * as Stripe from "stripe.";
 import Stripe from "stripe";
 import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
 
+import dotenv from "dotenv";
+dotenv.config('/.env');
 // export const sk = process.env.STRIPE_SECRET_KEY;
 import { sk } from "../../config/stripe.js";
 import {
@@ -11,7 +12,7 @@ import {
 } from "../../repository/payment-orders/index.js";
 import { JWT_SECRET } from "../../utils/utils.js";
 
-const stripe = new Stripe(sk);
+const stripe = new Stripe(sk??process.env.STRIPE_SECRET_KEY);
 
 
 // console.log(sk)
