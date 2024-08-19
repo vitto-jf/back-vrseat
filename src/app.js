@@ -23,7 +23,7 @@ import stripeRoute from "./routes/stripe.routes.js";
 
 // REFERAL CODES
 import referalCodeRoute from "./routes/refCode.routes.js";
-import paymentOrders from "./routes/paymentOders.routes.js";
+import paymentOrders from "./routes/paymentOrders.routes.js";
 import { createSales } from "./repository/sales/index.js";
 import axios from "axios";
 

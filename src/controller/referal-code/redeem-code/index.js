@@ -27,9 +27,9 @@ export async function executeRedeemCode(req, res) {
         }
 
         const objectData = {
-          sponsorId: code.client.toString(),
-          refCode: code.code,
-          sponsorName: resSponsor.company_name,
+          clientId: code.client.toString(),
+          codeRef: code.code.toString(),
+          clientName: resSponsor.company_name.toString(),
         };
         addItemToUserInventory(code.product_id, userId, objectData);
         deactivateCode(code.code);

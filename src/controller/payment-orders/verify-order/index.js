@@ -3,6 +3,8 @@ import { getOrder } from "../../../repository/payment-orders/index.js";
 import { PlayFabServer } from "playfab-sdk";
 import { CompileErrorReport, JWT_SECRET } from "../../../utils/utils.js";
 import jwt from "jsonwebtoken";
+import { STATUS_CODE } from "../../../utils/status.js";
+
 
 dotenv.config();
 
@@ -19,6 +21,10 @@ export async function verifyOrder(req, res, next) {
 
     if (orderData.isPaid) {
       return res.json({ isSuccess: false, message: "Tu orden ya esta pagada" });
+    }
+
+    if (orderData.orderStatus===STATUS_CODE.expired) {
+      return res.json({ isSuccess: false, message: "Tu orden ya expiro." });
     }
     PlayFabServer.GetUserInventory({ PlayFabId: userId }, (error, result) => {
       if (result !== null) {

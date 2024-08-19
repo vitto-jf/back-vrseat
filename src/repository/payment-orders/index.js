@@ -134,6 +134,37 @@ export async function updateStatusOrder(orderId, userId, status) {
   }
 }
 
+
+
+export async function updateOrderFields(orderId, userId, statusOrder) {
+  const client = await getMongoClient();
+  const db = client.db(dbName);
+
+  try {
+    const res = await db
+      .collection("orders")
+      .updateOne(
+        { orderId: orderId, userId: userId },
+        { $set: {orderStatus:statusOrder}}
+      );
+
+      console.log(res)
+    if (res.matchedCount === 0) {
+      return {
+        isSuccess: false,
+        message: "No se encontró la orden para actualizar",
+      };
+    }
+    return { isSuccess: true, message: "Orden actualizada correctamente" };
+  } catch (error) {
+    console.error("Error al actualizar el estado de la orden:", error);
+    return {
+      isSuccess: false,
+      message: "Error al actualizar el estado de la orden",
+      error,
+    };
+  }
+}
 export async function updateDataOrder(orderId, userId, orderUpdate) {
   const client = await getMongoClient();
   const db = client.db(dbName);
