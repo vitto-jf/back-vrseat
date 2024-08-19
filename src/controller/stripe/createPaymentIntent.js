@@ -1,8 +1,10 @@
 //import * as Stripe from "stripe.";
 import Stripe from "stripe";
 import jwt from "jsonwebtoken";
-
-import { sk } from "../../config/stripe.js";
+import dotenv from "dotenv";
+dotenv.config();
+export const sk = process.env.STRIPE_SECRET_KEY;
+// import { sk } from "../../config/stripe.js";
 import {
   getOrder,
   updateDataOrder,
@@ -24,7 +26,7 @@ export async function createStripePaymentIntent(req, res) {
     if (!orderData) {
       return res.json({ isSuccess: false, message: "No se encontró la orden" });
     }
-    console.log(orderData)
+
     if (orderData.isPaid) {
       return res.json({ isSuccess: false, message: "Tu orden ya esta pagada" });
     }
