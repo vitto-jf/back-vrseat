@@ -2,9 +2,9 @@
 import Stripe from "stripe";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-dotenv.config();
-export const sk = process.env.STRIPE_SECRET_KEY;
-// import { sk } from "../../config/stripe.js";
+
+// export const sk = process.env.STRIPE_SECRET_KEY;
+import { sk } from "../../config/stripe.js";
 import {
   getOrder,
   updateDataOrder,
@@ -13,6 +13,8 @@ import { JWT_SECRET } from "../../utils/utils.js";
 
 const stripe = new Stripe(sk);
 
+
+console.log(sk)
 export async function createStripePaymentIntent(req, res) {
   const { orderId, userToken } = req.body;
   try {
@@ -31,7 +33,7 @@ export async function createStripePaymentIntent(req, res) {
       return res.json({ isSuccess: false, message: "Tu orden ya esta pagada" });
     }
 
-    const { products, amount,expirationDate , _id } = orderData;
+    const { products, amount, expirationDate, _id } = orderData;
 
     const paymentIntents = await stripe.paymentIntents.list({
       limit: 100, // Ajusta el límite según tus necesidades
@@ -43,16 +45,18 @@ export async function createStripePaymentIntent(req, res) {
     let paymentIntent;
     if (existingPaymentIntent) {
       // Si existe un PaymentIntent con el orderId en la metadata, lo actualizamos
-      paymentIntent = await stripe.paymentIntents.update(existingPaymentIntent.id, {
-        amount: amount * 100, // Actualizamos la cantidad si es necesario
-      });
+      paymentIntent = await stripe.paymentIntents.update(
+        existingPaymentIntent.id,
+        {
+          amount: amount * 100, // Actualizamos la cantidad si es necesario
+        }
+      );
     } else {
       // Si no existe, creamos un nuevo PaymentIntent
       paymentIntent = await stripe.paymentIntents.create({
         amount: amount * 100,
         currency: "usd", // Ajusta la moneda según tu caso
         metadata: { orderId: _id.toString() },
-        
       });
     }
 
@@ -77,7 +81,7 @@ export async function createStripePaymentIntent(req, res) {
     return res.status(200).send({
       isSuccess: true,
       cs: paymentIntent.client_secret,
-      infoOrder: { products, amount,expirationDate },
+      infoOrder: { products, amount, expirationDate },
     });
   } catch (error) {
     console.error(error);
