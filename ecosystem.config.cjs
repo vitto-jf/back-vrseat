@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   apps: [
     {
       name: 'my-app', // Cambia esto al nombre que desees para tu aplicación
