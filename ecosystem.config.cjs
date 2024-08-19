@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'my-app', // Cambia esto al nombre que desees para tu aplicación
+      name: 'vr-seat-back', // Cambia esto al nombre que desees para tu aplicación
       script: 'node src/index.js',
       env: {
         NODE_ENV: 'production',
