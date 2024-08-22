@@ -28,7 +28,7 @@ export async function executeCodeValidation(req, res){
 }
 
 export function codesValidation(codesToValidate){
-    if (codesToValidate == null || codesToValidate == []) return false;
+    if (codesToValidate == null || codesToValidate.length < 1) return false;
     try{
         console.log(codesToValidate);
         for (const code of codesToValidate) {
