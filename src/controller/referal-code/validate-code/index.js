@@ -28,6 +28,7 @@ export async function executeCodeValidation(req, res){
 }
 
 export function codesValidation(codesToValidate){
+    if (codesToValidate == null) return false;
     try{
         console.log(codesToValidate);
         for (const code of codesToValidate) {
