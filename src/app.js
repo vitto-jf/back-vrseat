@@ -27,6 +27,7 @@ import referalCodeRoute from "./routes/refCode.routes.js";
 import paymentOrders from "./routes/paymentOrders.routes.js";
 import { createSales } from "./repository/sales/index.js";
 import axios from "axios";
+import { loginWithGoogle } from "./controller/auth/LoginGoogle/index.js";
 
 const app = express();
 
@@ -67,11 +68,13 @@ app.get("/", (req, res) => {
 });
 
 app.post("/login", login);
+app.post("/login-google",loginWithGoogle)
 app.get("/create-user", singup);
 
 //QUITAR ITEM
 app.get("/remove-item", removeItemInventory);
 app.get("/test-cookie", async (req, res) => {
+  
   const result = await axios.post(
     process.env.URL_PATH + "/add-item",
     {

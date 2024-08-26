@@ -5,16 +5,20 @@ import { CompileErrorReport, JWT_SECRET } from "../../../utils/utils.js";
 import jwt from "jsonwebtoken";
 import { STATUS_CODE } from "../../../utils/status.js";
 
-
 dotenv.config();
 
 export async function verifyOrder(req, res, next) {
   const { userToken, orderId } = req.body;
 
+  const auth = req.headers.authorization;
+  
   try {
     const userId = jwt.verify(userToken, JWT_SECRET);
-
+    const authId = jwt.verify(auth, JWT_SECRET);
+    console.log(authId);
+   
     const orderData = await getOrder(orderId, userId);
+    console.log(orderData);
     if (!orderData) {
       return res.json({ isSuccess: false, message: "No se encontró la orden" });
     }
@@ -23,7 +27,7 @@ export async function verifyOrder(req, res, next) {
       return res.json({ isSuccess: false, message: "Tu orden ya esta pagada" });
     }
 
-    if (orderData.orderStatus===STATUS_CODE.expired) {
+    if (orderData.orderStatus === STATUS_CODE.expired) {
       return res.json({ isSuccess: false, message: "Tu orden ya expiro." });
     }
     PlayFabServer.GetUserInventory({ PlayFabId: userId }, (error, result) => {
