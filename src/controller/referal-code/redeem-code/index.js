@@ -33,7 +33,7 @@ export async function executeRedeemCode(req, res) {
           clientName: resSponsor.company_name.toString(),
         };
         addItemToUserInventory(code.product_id, userId, objectData);
-        if (code !== "VINOTINTO1") {
+        if (!String(code.code).includes("VINOTINTO1")) {
           deactivateCode(code.code);
         }
       }
