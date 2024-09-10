@@ -33,7 +33,9 @@ export async function executeRedeemCode(req, res) {
           clientName: resSponsor.company_name.toString(),
         };
         addItemToUserInventory(code.product_id, userId, objectData);
-        deactivateCode(code.code);
+        if (code !== "VINOTINTO1") {
+          deactivateCode(code.code);
+        }
       }
       return res.status(200).send({
         isSuccess: true,
