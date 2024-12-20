@@ -1,8 +1,11 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import { Server } from "socket.io";
+import http from "http";
+
 dotenv.config();
-import { PlayFabServer } from "playfab-sdk";
+import { PlayFabAdmin, PlayFabClient, PlayFabServer } from "playfab-sdk";
 
 import PlayFab from "playfab-sdk/Scripts/PlayFab/PlayFab.js";
 //import PlayFab from "playfab-sdk";
@@ -22,6 +25,8 @@ import { CompileErrorReport } from "./utils/utils.js";
 import paymentRoute from "./routes/payment.routes.js";
 import stripeRoute from "./routes/stripe.routes.js";
 
+
+
 // REFERAL CODES
 import referalCodeRoute from "./routes/refCode.routes.js";
 import paymentOrders from "./routes/paymentOrders.routes.js";
@@ -30,7 +35,29 @@ import axios from "axios";
 import { loginWithGoogle } from "./controller/auth/LoginGoogle/index.js";
 
 const app = express();
+const server = http.createServer(app);
 
+const io = new Server(server);
+
+io.on('connection', (socket) => {
+  console.log('a user connected');
+  socket.on("disconnect", () => {
+    console.log("Usuario desconectado:", socket.id);
+  });
+
+    // Escuchar el evento "joinRoom" para agregar al usuario a una sala específica
+    socket.on('joinRoom', (userId) => {
+      if (userId) {
+        socket.join(userId); // Agregar al usuario a una sala basada en su userId
+        console.log(`Usuario ${socket.id} unido a la sala: ${userId}`);
+      } else {
+        console.warn(`Usuario ${socket.id} intentó unirse sin un userId.`);
+      }
+    });
+  socket.onAny((event, ...args) => {
+    console.log(`Evento recibido del cliente: ${event}`, args);
+});
+});
 PlayFab.settings.developerSecretKey = playfabConfig.secretKey;
 
 PlayFab.settings.titleId = playfabConfig.titleId;
@@ -42,6 +69,8 @@ app.use(
       "http://localhost:5173",
       "http://localhost:5001",
       "https://vr-seat.vrinsitu.com",
+      "https://r3d3zc3d-5173.use2.devtunnels.ms"
+      
     ],
     methods: ["POST", "GET"],
     credentials: true,
@@ -52,9 +81,9 @@ app.use(cookieParser());
 
 app.use(
   express.json({
-    verify: function (req, res, buf) {
-      const url = req.originalUrl;
-      if (url.startsWith("/stripe/webhook")) {
+    verify: function (req, res, buf,encoding) {
+      // const url = req.originalUrl;
+      if (req.path.includes('/stripe/webhook')) {
         req.rawBody = buf.toString();
       }
     },
@@ -63,18 +92,22 @@ app.use(
 
 app.use(express.urlencoded({ extended: true }));
 
+
+
+
+
 app.get("/", (req, res) => {
   res.send({ message: "Servidor funcionando", isSucces: true });
 });
 
 app.post("/login", login);
-app.post("/login-google",loginWithGoogle)
+app.post("/login-google", loginWithGoogle)
 app.get("/create-user", singup);
 
 //QUITAR ITEM
 app.get("/remove-item", removeItemInventory);
 app.get("/test-cookie", async (req, res) => {
-  
+
   const result = await axios.post(
     process.env.URL_PATH + "/add-item",
     {
@@ -128,11 +161,49 @@ app.post(
   }
 );
 
-// app.get("/test", async (req, res) => {
-//   const result = await createSales("000001", "TEST");
-//   console.log(result);
-//   return res.json({ result });
-// });
+
+app.get("/test", async (req, res) => {
+  const players = []
+  const emails = [];
+  const errorPLAYFABID = [];
+
+
+
+  try {
+    // Map through players and return a promise for each API call
+    await Promise.all(players.map(e =>
+      new Promise((resolve) => {
+        PlayFabServer.GetUserAccountInfo({ PlayFabId: e.Entity_Id }, (err, result) => {
+          if (err) {
+            console.log(err);
+            errorPLAYFABID.push(e.Entity_Id);
+            return resolve(); // Resolve even if there's an error to avoid hanging the Promise.all
+          }
+          if (result) {
+            emails.push(result.data.UserInfo.PrivateInfo.Email);
+          }
+          resolve(); // Resolve when the API call completes
+        });
+      })
+    ));
+
+    return res.json({
+      players: players.length,
+      cantidad: emails.length,
+      emails: emails.join(','),  // This will join all emails into a single string separated by commas
+      errorPLAYFABID
+    });
+
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Algo salió mal con tu primera llamada a la API. CAT",
+      debugInfo: CompileErrorReport(error),
+    });
+  }
+});
+
 
 app.get("/get-inventory", async (req, res) => {
   try {
@@ -182,4 +253,5 @@ app.use("/referal-code", referalCodeRoute);
 /***************************************************
  *************** REFERAL CODES END *****************
  **************************************************/
-export default app;
+
+export { app, server, io };

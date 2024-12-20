@@ -63,8 +63,14 @@ export async function queryCreatePaymentOrder(orderData) {
   };
 
   try {
-    const result = await db.collection("orders").insertOne(dataObject);
-    return { orderId };
+    const result = await db.collection("orders").insertOne(dataObject)
+    
+    return {
+      isSuccess: true,
+      orderId,
+      dataOrder: { ...dataObject }, // Nueva propiedad que incluye los datos completos
+
+    };
   } catch (error) {
     console.error("Error al crear la orden:", error);
     return { isSuccess: false, message: "Error al crear la orden", error };

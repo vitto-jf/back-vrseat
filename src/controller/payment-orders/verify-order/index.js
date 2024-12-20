@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import { getOrder } from "../../../repository/payment-orders/index.js";
-import { PlayFabServer } from "playfab-sdk";
+import { PlayFabAdmin, PlayFabServer } from "playfab-sdk";
 import { CompileErrorReport, JWT_SECRET } from "../../../utils/utils.js";
 import jwt from "jsonwebtoken";
 import { STATUS_CODE } from "../../../utils/status.js";
@@ -30,10 +30,11 @@ export async function verifyOrder(req, res, next) {
     if (orderData.orderStatus === STATUS_CODE.expired) {
       return res.json({ isSuccess: false, message: "Tu orden ya expiro." });
     }
-    PlayFabServer.GetUserInventory({ PlayFabId: userId }, (error, result) => {
+    PlayFabAdmin.GetUserInventory({ PlayFabId: userId }, (error, result) => {
       if (result !== null) {
+        
         const exitsItem = orderData.products.every((p) =>
-          result.data.Inventory.some((i) => i.ItemId === p.id)
+          result.data.Inventory?.some((i) => i.ItemId === p.id)
         );
         // console.log(exitsItem);
         if (exitsItem) {
